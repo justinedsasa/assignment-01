@@ -1,16 +1,23 @@
+// shortcut to get element by id
 const $id = (id) => document.getElementById(id);
 
+// main elements
 const amountInput = $id('amount_input');
 const sortBySelect = $id('sort_by');
 const bodyContainer = $id('body');
 
+// API details
 const apiUrl = 'https://randomuser.me/api/';
 const maxUsers = 1000;
 const minUsers = 0;
 const timeout = 3000;
 
+// where we store all users
 let currentUsers = [];
+// track which user is selected
+let selectedUserIndex = null;
 
+// press enter in input = generate users
 amountInput.addEventListener('keypress', async (event) => {
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -18,10 +25,12 @@ amountInput.addEventListener('keypress', async (event) => {
   }
 });
 
+// when sorting changes, show users again
 sortBySelect.addEventListener('change', () => {
   if (currentUsers.length > 0) renderUsers(currentUsers, sortBySelect.value);
 });
 
+// generate user list
 async function generateUsers() {
   const count = Number(amountInput.value.trim());
   const nameDisplay = sortBySelect.value;
@@ -44,6 +53,7 @@ async function generateUsers() {
   }
 }
 
+// get random users from API
 async function fetchRandomUsers(count) {
   try {
     const response = await fetch(`${apiUrl}?results=${count}`);
@@ -59,13 +69,16 @@ async function fetchRandomUsers(count) {
   }
 }
 
+// show users in rows
 function renderUsers(users, nameDisplay) {
   clearUserRows();
 
-  users.forEach(user => {
+  users.forEach((user, index) => {
     const rowDiv = document.createElement('div');
-    rowDiv.className = 'row mb-2';
+    rowDiv.className = 'row mb-2 user-row';
+    rowDiv.style.cursor = 'pointer';
 
+    // pick first or last name
     const nameCol = document.createElement('div');
     nameCol.className = 'col-md-3 text-center';
     nameCol.textContent = (nameDisplay === 'first_name') ? user.name.first : user.name.last;
@@ -83,15 +96,21 @@ function renderUsers(users, nameDisplay) {
     countryCol.textContent = user.location.country;
 
     rowDiv.append(nameCol, genderCol, emailCol, countryCol);
+
+    // double click opens modal
+    rowDiv.addEventListener('dblclick', () => openUserModal(index));
+
     bodyContainer.appendChild(rowDiv);
   });
 }
 
+// keep users and show them
 function displayNewUsers(users, nameDisplay) {
   currentUsers = users;
   renderUsers(currentUsers, nameDisplay);
 }
 
+// small alert box for info/errors
 function showTempMessage(message, type) {
   clearUserRows();
   const msgDiv = document.createElement('div');
@@ -101,6 +120,7 @@ function showTempMessage(message, type) {
   setTimeout(() => msgDiv.remove(), timeout);
 }
 
+// check if input is okay
 function validateInput(amount) {
   if (Number.isNaN(amount) || amount === '') {
     showTempMessage('Please enter a valid number.', 'danger');
@@ -113,12 +133,72 @@ function validateInput(amount) {
   return true;
 }
 
+// capitalize first letter
 function capitalizeFirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// remove all user rows
 function clearUserRows() {
   while (bodyContainer.children.length > 1) {
     bodyContainer.removeChild(bodyContainer.lastChild);
   }
 }
+
+// modal elements
+const userModal = new bootstrap.Modal($id('userModal'));
+const userPicture = $id('user-picture');
+const userFullname = $id('user-fullname');
+const userEmail = $id('user-email');
+const userPhone = $id('user-phone');
+const userCell = $id('user-cell');
+const userDob = $id('user-dob');
+const userGender = $id('user-gender');
+const userAddress = $id('user-address');
+const deleteBtn = $id('deleteUserBtn');
+const editBtn = $id('editUserBtn');
+
+// open modal and show user info
+function openUserModal(index) {
+  selectedUserIndex = index;
+  const user = currentUsers[index];
+
+  userPicture.src = user.picture.large;
+  userFullname.textContent = `${capitalizeFirst(user.name.title)} ${capitalizeFirst(user.name.first)} ${capitalizeFirst(user.name.last)}`;
+  userEmail.textContent = user.email;
+  userPhone.textContent = user.phone;
+  userCell.textContent = user.cell;
+  userDob.textContent = new Date(user.dob.date).toLocaleDateString();
+  userGender.textContent = capitalizeFirst(user.gender);
+  userAddress.textContent = `${user.location.street.number} ${user.location.street.name}, ${user.location.city}, ${user.location.state}, ${user.location.country}, ${user.location.postcode}`;
+
+  userModal.show();
+}
+
+// delete user
+deleteBtn.addEventListener('click', () => {
+  if (selectedUserIndex !== null) {
+    currentUsers.splice(selectedUserIndex, 1);
+    renderUsers(currentUsers, sortBySelect.value);
+    userModal.hide();
+  }
+});
+
+// edit user
+editBtn.addEventListener('click', () => {
+  if (selectedUserIndex !== null) {
+    const user = currentUsers[selectedUserIndex];
+
+    // basic editing using prompts
+    const newEmail = prompt('Edit Email:', user.email);
+    const newPhone = prompt('Edit Phone:', user.phone);
+    const newCell = prompt('Edit Cell:', user.cell);
+
+    if (newEmail) user.email = newEmail;
+    if (newPhone) user.phone = newPhone;
+    if (newCell) user.cell = newCell;
+
+    renderUsers(currentUsers, sortBySelect.value);
+    openUserModal(selectedUserIndex);
+  }
+});
