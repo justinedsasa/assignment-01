@@ -7,7 +7,7 @@ const sortBySelect = $id('sort_by');
 const bodyContainer = $id('body');
 
 // API details
-const apiUrl = 'https://randomuser.me/api/';
+const apiUrl = 'http://localhost:3000/api';
 const maxUsers = 1000;
 const minUsers = 0;
 const timeout = 3000;
