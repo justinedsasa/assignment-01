@@ -189,14 +189,45 @@ editBtn.addEventListener('click', () => {
   if (selectedUserIndex !== null) {
     const user = currentUsers[selectedUserIndex];
 
-    // basic editing using prompts
-    const newEmail = prompt('Edit Email:', user.email);
-    const newPhone = prompt('Edit Phone:', user.phone);
-    const newCell = prompt('Edit Cell:', user.cell);
+  // Edit name
+  const newFirstName = prompt('Edit First Name:', user.name.first);
+  const newLastName = prompt('Edit Last Name:', user.name.last);
+  if (newFirstName) user.name.first = newFirstName;
+  if (newLastName) user.name.last = newLastName;
 
-    if (newEmail) user.email = newEmail;
-    if (newPhone) user.phone = newPhone;
-    if (newCell) user.cell = newCell;
+  // Edit email
+  const newEmail = prompt('Edit Email:', user.email);
+  if (newEmail) user.email = newEmail;
+
+  // Edit phone
+  const newPhone = prompt('Edit Phone:', user.phone);
+  if (newPhone) user.phone = newPhone;
+
+  // Edit cell
+  const newCell = prompt('Edit Cell:', user.cell);
+  if (newCell) user.cell = newCell;
+
+  // Edit DOB
+  const newDob = prompt('Edit Date of Birth (YYYY-MM-DD):', user.dob.date.slice(0,10));
+  if (newDob) user.dob.date = newDob;
+
+  // Edit gender
+  const newGender = prompt('Edit Gender:', user.gender);
+  if (newGender) user.gender = newGender;
+
+  // Edit address
+  const newStreetNumber = prompt('Edit Street Number:', user.location.street.number);
+  const newStreetName = prompt('Edit Street Name:', user.location.street.name);
+  const newCity = prompt('Edit City:', user.location.city);
+  const newState = prompt('Edit State:', user.location.state);
+  const newCountry = prompt('Edit Country:', user.location.country);
+  const newPostcode = prompt('Edit Postcode:', user.location.postcode);
+  if (newStreetNumber) user.location.street.number = newStreetNumber;
+  if (newStreetName) user.location.street.name = newStreetName;
+  if (newCity) user.location.city = newCity;
+  if (newState) user.location.state = newState;
+  if (newCountry) user.location.country = newCountry;
+  if (newPostcode) user.location.postcode = newPostcode;
 
     renderUsers(currentUsers, sortBySelect.value);
     openUserModal(selectedUserIndex);
